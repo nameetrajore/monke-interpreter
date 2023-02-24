@@ -33,8 +33,7 @@ func (p *Parser) nextToken(){
 }
 
 func (p *Parser) ParseProgram() *ast.Program {
-	program := &ast.Program{}
-	program.Statements = []ast.Statement{}
+	program := &ast.Program{Statements: []ast.Statement{}}
 
 	for !p.currTokenIs(token.EOF) {
 		stmt := p.parseStatement()
@@ -50,6 +49,8 @@ func (p *Parser) parseStatement() ast.Statement {
 	switch p.currToken.Type {
 	case token.LET:
 		return p.parseLetStatement()
+	case token.RETURN:
+		return p.parseReturnStatement()
 	default:
 		return nil
 	}
@@ -69,6 +70,17 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 	}
 
 	for !p.currTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return stmt
+}
+
+func (p *Parser) parseReturnStatement() *ast.ReturnStatement{
+	stmt := &ast.ReturnStatement{Token: p.currToken}
+
+	p.nextToken()
+	for p.currTokenIs(token.SEMICOLON){
 		p.nextToken()
 	}
 
