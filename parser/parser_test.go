@@ -6,30 +6,31 @@ import (
 	"monke/lexer"
 )
 
-func TestReturnStatements(t *testing.T) {
-input := `
-return 5;
-return 10;
-return 993322;
-`
+func TestIdentifierExpression(t *testing.T) {
+input := "foobar;"
 l := lexer.New(input)
 p := New(l)
 program := p.ParseProgram()
 checkParserErrors(t, p)
-if len(program.Statements) != 3 {
-t.Fatalf("program.Statements does not contain 3 statements. got=%d",
+if len(program.Statements) != 1 {
+t.Fatalf("program has not enough statements. got=%d",
 len(program.Statements))
 }
-for _, stmt := range program.Statements {
-returnStmt, ok := stmt.(*ast.ReturnStatement)
+stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
 if !ok {
-t.Errorf("stmt not *ast.ReturnStatement. got=%T", stmt)
-continue
+t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
+program.Statements[0])
 }
-if returnStmt.TokenLiteral() != "return" {
-t.Errorf("returnStmt.TokenLiteral not 'return', got %q",
-returnStmt.TokenLiteral())
+ident, ok := stmt.Expression.(*ast.Identifier)
+if !ok {
+t.Fatalf("exp not *ast.Identifier. got=%T", stmt.Expression)
 }
+if ident.Value != "foobar" {
+t.Errorf("ident.Value not %s. got=%s", "foobar", ident.Value)
+}
+if ident.TokenLiteral() != "foobar" {
+t.Errorf("ident.TokenLiteral not %s. got=%s", "foobar",
+ident.TokenLiteral())
 }
 }
 
