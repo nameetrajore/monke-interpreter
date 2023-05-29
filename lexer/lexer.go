@@ -129,18 +129,21 @@ func newToken(tokenType token.TokenType, ch byte) token.Token {
 
 // helper function to read the current character and advance readPosition and position
 func (l* Lexer) readChar(){
+	// sets current character to character at position
     if l.readPosition >= len(l.input){
         l.ch = 0
     } else {
         l.ch = l.input[l.readPosition]
     }
+	// moves position by 1
     l.position = l.readPosition
+	// moves readPosition by 1
     l.readPosition += 1
 }
 
 // creates a new lexer and returns a pointer to it
 func New(input string) *Lexer{
     l := &Lexer{input: input}
-    l.readChar()
+    l.readChar() //XXX: Why?
     return l
 }

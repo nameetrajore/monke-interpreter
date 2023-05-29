@@ -5,9 +5,11 @@ import "bytes"
 
 // An interface is a type that defines a set of methods
 type Node interface {
-	TokenLiteral() string
+	TokenLiteral() string // returns token literal
 	String() string // converts the struct to a string format. The way it would appear in the program. For debugging and testing purposes.
-}
+ }
+
+// Statements and Expressions are the only 2 kinds of statements we are considering in monke
 type Statement interface {
 	Node // TokenLiteral()
 	statementNode()
@@ -16,6 +18,7 @@ type Expression interface{
 	Node // TokenLiteral()
 	expressionNode()
 }
+
 
 type Program struct {
 	Statements []Statement
@@ -43,7 +46,7 @@ func (p *Program) TokenLiteral() string {
 // LetStatement is a part of Node and Statement
 type LetStatement struct {
 	Token token.Token
-	Name *Identifier // TODO QUESTION: Why is this a pointer?
+	Name *Identifier // XXX: Why is this a pointer?
 	Value Expression
 }
 
@@ -106,7 +109,55 @@ type Identifier struct {
 	Value string
 }
 
-// Identifier is a part of Node and Expression
+// Identifier is an Expression
 func (i *Identifier) expressionNode() {}
 func (i *Identifier) TokenLiteral() string { return i.Token.Literal }
 func (i *Identifier) String() string { return i.Value } // returns the identifier as it is
+
+
+type IntegerLiteral struct {
+	Token token.Token
+	Value int64
+}
+
+func (il *IntegerLiteral) expressionNode() {}
+func (il *IntegerLiteral) TokenLiteral() string {return il.Token.Literal}
+func (il *IntegerLiteral) String() string {return il.Token.Literal}
+
+type PrefixExpression struct{
+	Token token.Token
+	Operator string
+	Right Expression
+}
+
+func (pe *PrefixExpression) expressionNode() {}
+func (pe *PrefixExpression) TokenLiteral() string {return pe.Token.Literal};
+func (pe *PrefixExpression) String() string {
+	var out bytes.Buffer;
+	out.WriteString("(")
+	out.WriteString(pe.Operator)
+	out.WriteString(pe.Right.String())
+	out.WriteString(")")
+
+	return out.String()
+}
+
+type InfixExpression struct{
+	Token token.Token
+	Operator string
+	Left Expression
+	Right Expression
+}
+
+func (ie *InfixExpression) expressionNode() {}
+func (ie *InfixExpression) TokenLiteral() string {return ie.Token.Literal};
+func (ie *InfixExpression) String() string {
+	var out bytes.Buffer;
+	out.WriteString("(")
+	out.WriteString(ie.Left.String())
+	out.WriteString(" " + ie.Operator + " ")
+	out.WriteString(ie.Right.String())
+	out.WriteString(")")
+
+	return out.String()
+}
