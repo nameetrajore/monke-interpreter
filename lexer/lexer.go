@@ -6,7 +6,7 @@ import "monke/token"
 // the (next position) 'readPosition'
 // and the character at 'position'
 type Lexer struct {
-    input string
+    input string //contains the entire program
     position int
     readPosition int
     ch byte
@@ -53,55 +53,61 @@ func (l *Lexer) NextToken() token.Token {
     l.skipWhitespace()
 
     switch l.ch {
-		case '=':
-			if l.peekChar() == '='{
-			ch := l.ch
-			l.readChar()
-			//	for EQUALS
-			tok.Literal = string(ch) + string(l.ch)
-			tok.Type = token.EQ
-			} else {
-			// for ASSIGN
-				tok = newToken(token.ASSIGN, l.ch)
-			}
-		case ';': tok = newToken(token.SEMICOLON, l.ch)
-		case '(': tok = newToken(token.LPAREN, l.ch)
-		case ')': tok = newToken(token.RPAREN, l.ch)
-		case ',': tok = newToken(token.COMMA, l.ch)
-		case '+': tok = newToken(token.PLUS, l.ch)
-		case '-': tok = newToken(token.MINUS, l.ch)
-		case '!':
-			if l.peekChar() == '='{
-			ch := l.ch
-			l.readChar()
-				// for NOT EQUALS
-			tok.Literal = string(ch) + string(l.ch)
-			tok.Type = token.NOT_EQ
-			} else {
-				// for BANG
-				tok = newToken(token.BANG, l.ch)
-			}
-		case '*': tok = newToken(token.ASTERISK, l.ch)
-		case '/': tok = newToken(token.SLASH, l.ch)
-		case '<': tok = newToken(token.LT, l.ch)
-		case '>': tok = newToken(token.GT, l.ch)
-		case '{': tok = newToken(token.LBRACE, l.ch)
-		case '}': tok = newToken(token.RBRACE, l.ch)
-		case 0:
-			tok.Literal = ""
-			tok.Type = token.EOF
-		default:
-			if isLetter(l.ch) {
-				tok.Literal = l.readIdentifier()
-				tok.Type = token.LookupIdent(tok.Literal)
-				return tok
-			} else if isDigit(l.ch){
-				tok.Literal = l.readNumber()
-				tok.Type = token.INT
-				return tok
-			} else {
-				tok = newToken(token.ILLEGAL, l.ch)
-			}
+	case '=':
+		if l.peekChar() == '='{
+		ch := l.ch
+		l.readChar()
+		//	for EQUALS
+		tok.Literal = string(ch) + string(l.ch)
+		tok.Type = token.EQ
+		} else {
+		// for ASSIGN
+			tok = newToken(token.ASSIGN, l.ch)
+		}
+	case ';': tok = newToken(token.SEMICOLON, l.ch)
+	case ':' : tok = newToken(token.COLON, l.ch)
+	case '(': tok = newToken(token.LPAREN, l.ch)
+	case ')': tok = newToken(token.RPAREN, l.ch)
+	case '[': tok = newToken(token.LBRACKET, l.ch)
+	case ']': tok = newToken(token.RBRACKET, l.ch)
+	case ',': tok = newToken(token.COMMA, l.ch)
+	case '+': tok = newToken(token.PLUS, l.ch)
+	case '-': tok = newToken(token.MINUS, l.ch)
+	case '!':
+		if l.peekChar() == '='{
+		ch := l.ch
+		l.readChar()
+			// for NOT EQUALS
+		tok.Literal = string(ch) + string(l.ch)
+		tok.Type = token.NOT_EQ
+		} else {
+			// for BANG
+			tok = newToken(token.BANG, l.ch)
+		}
+	case '*': tok = newToken(token.ASTERISK, l.ch)
+	case '/': tok = newToken(token.SLASH, l.ch)
+	case '<': tok = newToken(token.LT, l.ch)
+	case '>': tok = newToken(token.GT, l.ch)
+	case '{': tok = newToken(token.LBRACE, l.ch)
+	case '}': tok = newToken(token.RBRACE, l.ch)
+	case '"':
+		tok.Type = token.STRING
+		tok.Literal = l.readString()
+	case 0:
+		tok.Literal = ""
+		tok.Type = token.EOF
+	default:
+		if isLetter(l.ch) {
+			tok.Literal = l.readIdentifier()
+			tok.Type = token.LookupIdent(tok.Literal)
+			return tok
+		} else if isDigit(l.ch){
+			tok.Literal = l.readNumber()
+			tok.Type = token.INT
+			return tok
+		} else {
+			tok = newToken(token.ILLEGAL, l.ch)
+		}
     }
     l.readChar()
     return tok
@@ -115,6 +121,19 @@ func (l *Lexer) readIdentifier() string {
     }
 
     return l.input[position:l.position]
+}
+
+func (l *Lexer) readString() string {
+	position := l.position + 1
+
+	for {
+		l.readChar()
+		if l.ch == '"' || l.ch == 0 {
+			break;
+		}
+	}
+
+	return l.input[position : l.position]
 }
 
 // helper function to check if 'ch' is a letter

@@ -1,0 +1,2 @@
+let f = fn(x) {return x*x;};
+f(129037812);
